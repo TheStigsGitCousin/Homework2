@@ -1,4 +1,4 @@
-package homework2;
+package homework2.bank;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -5,17 +5,17 @@
  */
 package homework2;
 
+import java.util.Calendar;
+import java.util.Random;
+
 /**
  *
  * @author David
  */
-public class Homework2 {
-
-//    /**
-//     * @param args the command line arguments
-//     */
-//    public static void main(String[] args) {
-//        // TODO code application logic here
-//    }
+public class Handler {
+    private static Random random=new Random();
     
+    public static long getRandomLong(){
+        return random.nextLong();
+    }
 }

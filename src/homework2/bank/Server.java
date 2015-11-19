@@ -1,4 +1,4 @@
-package homework2;
+package homework2.bank;
 
 import java.rmi.Naming;
 import java.rmi.RemoteException;

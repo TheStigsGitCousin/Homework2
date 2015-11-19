@@ -5,6 +5,7 @@
 */
 package homework2;
 
+import homework2.bank.Account;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -14,9 +15,13 @@ import java.rmi.server.UnicastRemoteObject;
  */
 public class OwnerImpl extends UnicastRemoteObject implements Owner {
     
-    public String name;
+    private String name;
+    private Account account;
     
-    public OwnerImpl() throws RemoteException{}
+    public OwnerImpl(String name, Account account) throws RemoteException{
+        this.name=name;
+        this.account=account;
+    }
     
     @Override
     public void itemSold(Item item) throws RemoteException {
@@ -27,10 +32,15 @@ public class OwnerImpl extends UnicastRemoteObject implements Owner {
     public void wishAvaible(Item item) throws RemoteException {
         System.out.println("Your wish-item ("+item.toString()+") is now avaible!");
     }
-
+    
     @Override
     public String getName() throws RemoteException {
         return name;
+    }
+    
+    @Override
+    public Account getBankAccount() throws RemoteException {
+        return account;
     }
     
 }
