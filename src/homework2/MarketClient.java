@@ -5,6 +5,7 @@
 */
 package homework2;
 
+import Views.ClientPanel;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFrame;
 
 /**
  *
@@ -22,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class MarketClient {
     
-    public MarketClient(String clientName) throws RemoteException{
+    public MarketClient(String bankName) throws RemoteException{
 //        Owner ownerObject=new OwnerImpl();
         // Register the newly created object at rmiregistry.
         try {
@@ -35,18 +37,23 @@ public class MarketClient {
 //        } catch (MalformedURLException ex) {
 //            Logger.getLogger(MarketClient.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-        Map<String, List<String>> map=new HashMap<>();
-        List<String> list=new ArrayList<>();
-        list.add("first item");
-        map.put("hello",list);
-        List<String> list2=map.get("hello");
-        list2.add("Second item");
-        for(String s : map.get("hello")){
-            System.out.println(s);
-        }
+        JFrame frame=new JFrame("ClientApplication");
+        ClientPanel clientPanel;
+        if(bankName==null)
+            clientPanel=new ClientPanel();
+        else
+            clientPanel=new ClientPanel(bankName);
+        
+        frame.setContentPane(clientPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
     }
     
     public static void main(String[] args) throws RemoteException {
-        new MarketClient("clientName");
+        if(args.length!=1)
+            new MarketClient(null);
+        else
+            new MarketClient(args[0]);
     }
 }

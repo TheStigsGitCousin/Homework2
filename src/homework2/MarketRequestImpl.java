@@ -30,7 +30,7 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
     }
     
     @Override
-    public String UploadItem(Item item) throws RemoteException {
+    public String SellItem(Item item) throws RemoteException {
         String message="error uploading item";
         synchronized(uploadedItems){
             long id;
@@ -58,7 +58,7 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
     }
     
     @Override
-    public List<Item> ListItems(Item item) throws RemoteException {
+    public List<Item> ListItems() throws RemoteException {
         synchronized(uploadedItems){
             return new ArrayList<>(uploadedItems.values());
         }

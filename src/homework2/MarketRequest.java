@@ -16,8 +16,8 @@ import java.util.List;
  */
 public interface MarketRequest extends Remote {
     
-    public String UploadItem(Item item) throws RemoteException;
-    public List<Item> ListItems(Item item) throws RemoteException;
+    public String SellItem(Item item) throws RemoteException;
+    public List<Item> ListItems() throws RemoteException;
     public String BuyItem(Item item, Owner owner) throws RemoteException;
     public String AddWish(Item item) throws RemoteException;
     public String Register(Owner owner) throws RemoteException;
