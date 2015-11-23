@@ -16,6 +16,6 @@ public class Handler {
     private static Random random=new Random();
     
     public static long getRandomLong(){
-        return random.nextLong();
+        return Math.abs(random.nextLong());
     }
 }

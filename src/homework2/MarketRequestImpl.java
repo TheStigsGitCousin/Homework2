@@ -31,6 +31,7 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
     
     @Override
     public String SellItem(Item item) throws RemoteException {
+        System.out.println("sell item. "+item.toString());
         String message="error uploading item";
         synchronized(uploadedItems){
             long id;
@@ -42,15 +43,20 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
             // Set item ID
             item.setId(id);
             uploadedItems.put(item.getId(), item);
+            System.out.println("Upload items length = "+uploadedItems.size());
             message="Upload of item successful";
             
             synchronized(wishedItems){
+                System.out.println(item.getName());
                 // Get all wished items and iterate through them
-                for(Item wishedItem:wishedItems.get(item.getName())){
-                    // If a wished item has the same name and a equal or higher price than the currently uploaded item => send notification
-                    // to the owner of the wish-item
-                    if(item.getName().equals(wishedItem.getName()) && item.getPrice()<=wishedItem.getPrice())
-                        item.getOwner().wishAvaible(item);
+                List<Item> li=wishedItems.get(item.getName());
+                if(li!=null){
+                    for(Item wishedItem:li){
+                        // If a wished item has the same name and a equal or higher price than the currently uploaded item => send notification
+                        // to the owner of the wish-item
+                        if(item.getName().equals(wishedItem.getName()) && item.getPrice()<=wishedItem.getPrice())
+                            item.getOwner().wishAvaible(item);
+                    }
                 }
             }
         }
@@ -60,12 +66,14 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
     @Override
     public List<Item> ListItems() throws RemoteException {
         synchronized(uploadedItems){
+            System.out.println("Upload items length = "+uploadedItems.size());
             return new ArrayList<>(uploadedItems.values());
         }
     }
     
     @Override
     public String BuyItem(Item item, Owner buyer) throws RemoteException {
+        System.out.println("buy item. item = "+item.toString()+", buyer = "+buyer.toString());
         String message="Unspecified error occured when buying item. No item bought.";
         synchronized(uploadedItems){
             Account sellerAccount=item.getOwner().getBankAccount();

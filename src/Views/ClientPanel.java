@@ -44,8 +44,8 @@ public class ClientPanel extends Panel {
     private static Owner owner;
     
     // Game components
-    private JLabel statusMessageLabel=new JLabel("");
-    private JLabel currentGuessLabel=new JLabel("Start the game!");
+    private JLabel statusMessageLabel=new JLabel("STATUS MESSAGE:");
+    private JLabel itemsLabel=new JLabel("Items");
     private JTextField accountNameTextField=new JTextField(10);
     private JButton registerButton=new JButton("Register/Log in");
     private JButton listItemsButton=new JButton("List items");
@@ -53,7 +53,10 @@ public class ClientPanel extends Panel {
     private JTextField itemNameTextField=new JTextField(10);
     private JTextField itemPriceTextField=new JTextField(10);
     private JButton sellButton=new JButton("sell");
+    private JButton wishButton=new JButton("wish");
     
+    private JTextField buyItemNameTextField=new JTextField(10);
+    private JButton buyButton=new JButton("buy");
     
     public ClientPanel(String bankName) throws RemoteException{
         
@@ -84,8 +87,12 @@ public class ClientPanel extends Panel {
         registerButton.addActionListener((ActionEvent e)->{ registerOrLogIn(); });
         accountNameTextField.addActionListener((ActionEvent e)->{ registerOrLogIn(); });
         
+        buyButton.addActionListener((ActionEvent e)->{ buy(); });
+        buyItemNameTextField.addActionListener((ActionEvent e)->{ buy(); });
+        
         itemNameTextField.addActionListener((ActionEvent e)->{ sell(); });
         sellButton.addActionListener((ActionEvent e)->{ sell(); });
+        wishButton.addActionListener((ActionEvent e)->{ wish(); });
         
         listItemsButton.addActionListener((ActionEvent e)->{ listItems();});
         JPanel gamePanel=new JPanel();
@@ -97,28 +104,50 @@ public class ClientPanel extends Panel {
         guessPanel.add(registerButton);
         guessPanel.add(listItemsButton);
         gamePanel.add(guessPanel, BorderLayout.NORTH);
-        gamePanel.add(currentGuessLabel, BorderLayout.CENTER);
         add(gamePanel, BorderLayout.NORTH);
         
-        JPanel connectionPanel=new JPanel();
-        connectionPanel.setLayout(new FlowLayout());
-        connectionPanel.add(new JLabel("name"));
-        connectionPanel.add(itemNameTextField);
-        connectionPanel.add(new JLabel("price"));
-        connectionPanel.add(itemPriceTextField);
-        connectionPanel.add(sellButton);
-        // Add connectionPanel to ClientPanel
-        add(connectionPanel, BorderLayout.CENTER);
+        JPanel tPanel=new JPanel();
+        tPanel.setLayout(new BorderLayout());
         
-        add(statusMessageLabel, BorderLayout.SOUTH);
+        JPanel sellAndWishPanel=new JPanel();
+        sellAndWishPanel.setLayout(new FlowLayout());
+        sellAndWishPanel.add(new JLabel("name"));
+        sellAndWishPanel.add(itemNameTextField);
+        sellAndWishPanel.add(new JLabel("price"));
+        sellAndWishPanel.add(itemPriceTextField);
+        sellAndWishPanel.add(sellButton);
+        sellAndWishPanel.add(wishButton);
+        // Add connectionPanel to ClientPanel
+        tPanel.add(sellAndWishPanel, BorderLayout.NORTH);
+        
+        JPanel buyPanel=new JPanel();
+        buyPanel.setLayout(new FlowLayout());
+        buyPanel.add(new JLabel("id"));
+        buyPanel.add(buyItemNameTextField);
+        buyPanel.add(buyButton);
+        // Add connectionPanel to ClientPanel
+        tPanel.add(buyPanel, BorderLayout.CENTER);
+        add(tPanel,BorderLayout.CENTER);
+        
+        JPanel itemsAndStatusPanel=new JPanel();
+        itemsAndStatusPanel.setLayout(new BorderLayout());
+        itemsAndStatusPanel.add(itemsLabel, BorderLayout.NORTH);
+        itemsAndStatusPanel.add(statusMessageLabel, BorderLayout.CENTER);
+        // Add connectionPanel to ClientPanel
+        add(itemsAndStatusPanel, BorderLayout.SOUTH);
     }
     
     private void listItems(){
         try {
             List<Item> result=market.ListItems();
+            System.out.println(result.size());
+            StringBuilder sb=new StringBuilder();
             for(Item item:result){
                 System.out.println(item.toString());
+                sb.append(item.toString());
+                sb.append("\r\n");
             }
+            itemsLabel.setText(sb.toString());
         } catch (RemoteException ex) {
             Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -153,7 +182,47 @@ public class ClientPanel extends Panel {
         try{
             price=Float.parseFloat(itemPriceTextField.getText());
         }catch(NumberFormatException e){
-            price=8080;
+            return;
+        }
+        if(itemNameTextField.getText().equals(""))
+            return;
+        
+        Item item=new Item(itemNameTextField.getText(), price, owner);
+        try {
+            String result=market.SellItem(item);
+            statusChanged(result);
+        } catch (RemoteException ex) {
+            Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
+            statusChanged("Remote exception");
+        }
+    }
+    
+    private void buy(){
+        float price;
+        try{
+            price=Float.parseFloat(itemPriceTextField.getText());
+        }catch(NumberFormatException e){
+            return;
+        }
+        if(itemNameTextField.getText().equals(""))
+            return;
+        
+        Item item=new Item(itemNameTextField.getText(), price, owner);
+        try {
+            String result=market.BuyItem(item, owner);
+            statusChanged(result);
+        } catch (RemoteException ex) {
+            Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
+            statusChanged("Remote exception");
+        }
+    }
+    
+    private void wish(){
+        float price;
+        try{
+            price=Float.parseFloat(itemPriceTextField.getText());
+        }catch(NumberFormatException e){
+            return;
         }
         if(itemNameTextField.getText().equals(""))
             return;
@@ -201,7 +270,7 @@ public class ClientPanel extends Panel {
             public void run()
             {
                 System.out.println("Client: Response = "+response);
-                currentGuessLabel.setText(response);
+                itemsLabel.setText(response);
                 if(response.contains("GAME OVER! Score ") || response.contains("Congratulations! Word"))
                     registerButton.setEnabled(false);
             }

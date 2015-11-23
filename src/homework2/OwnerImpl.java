@@ -24,6 +24,11 @@ public class OwnerImpl extends UnicastRemoteObject implements Owner {
     }
     
     @Override
+    public String toString(){
+        return name;
+    }
+    
+    @Override
     public void itemSold(Item item) throws RemoteException {
         System.out.println("Your item ("+item.toString()+") has been sold!");
     }

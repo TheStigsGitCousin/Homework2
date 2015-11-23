@@ -60,7 +60,7 @@ public class Item implements Serializable {
     @Override
     public String toString(){
         try {
-            return name+", "+Double.toString(price)+", "+owner.getName();
+            return name+", "+Long.toString(id)+", "+Double.toString(price)+", "+owner.getName();
         } catch (RemoteException ex) {
             Logger.getLogger(Item.class.getName()).log(Level.SEVERE, null, ex);
         }
