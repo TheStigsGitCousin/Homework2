@@ -18,30 +18,19 @@ import java.rmi.registry.LocateRegistry;
 public class MarketServer {
     
     private static final String USAGE = "java bankrmi.Server <bank_rmi_url>";
-    private static final String MARKET = "MyMarket";
-
-    public MarketServer(String bankName) {
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) throws Exception {
+        // TODO code application logic here
+        MarketRequest marketRequest=new MarketRequestImpl();
         try {
-            MarketRequest bankobj = new MarketRequestImpl();
-            // Register the newly created object at rmiregistry.
-            try {
-                LocateRegistry.getRegistry(1099).list();
-            } catch (RemoteException e) {
-                LocateRegistry.createRegistry(1099);
-            }
-            Naming.rebind(bankName, bankobj);
-            System.out.println(bankobj + " is ready.");
-        } catch (Exception e) {
-            e.printStackTrace();
+            LocateRegistry.getRegistry(1099).list();
+        } catch (RemoteException e) {
+            LocateRegistry.createRegistry(1099);
         }
-    }
-    
-    public static void main(String[] args) {
-        if (args.length > 1 || (args.length > 0 && args[0].equalsIgnoreCase("-h"))) {
-            System.out.println(USAGE);
-            System.exit(1);
-        }
-        new MarketServer(MARKET);
+        Naming.rebind("MarketRequest", marketRequest);
+        System.out.println("Binding complete…\n");
     }
     
 }

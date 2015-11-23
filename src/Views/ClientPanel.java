@@ -38,7 +38,6 @@ import javax.swing.SwingUtilities;
  */
 public class ClientPanel extends Panel {
     
-    private static final String HOST = "localhost";
     private static MarketRequest market;
     private static Bank bankobj;
     private static final String DEFAULT_BANK_NAME = "Nordea";
@@ -64,7 +63,7 @@ public class ClientPanel extends Panel {
             LocateRegistry.createRegistry(1099);
         }
         try {
-            market=(MarketRequest)Naming.lookup("rmi://"+HOST+"/MarketRequest");
+            market=(MarketRequest)Naming.lookup("MarketRequest");
             bankobj = (Bank) Naming.lookup(bankName);
         } catch (NotBoundException ex) {
             Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -87,6 +86,20 @@ public class ClientPanel extends Panel {
         
         itemNameTextField.addActionListener((ActionEvent e)->{ sell(); });
         sellButton.addActionListener((ActionEvent e)->{ sell(); });
+        
+        listItemsButton.addActionListener((ActionEvent e)->{ listItems();});
+        JPanel gamePanel=new JPanel();
+        gamePanel.setLayout(new BorderLayout());
+        JPanel guessPanel=new JPanel();
+        guessPanel.setLayout(new FlowLayout());
+        guessPanel.add(new JLabel("account name"));
+        guessPanel.add(accountNameTextField);
+        guessPanel.add(registerButton);
+        guessPanel.add(listItemsButton);
+        gamePanel.add(guessPanel, BorderLayout.NORTH);
+        gamePanel.add(currentGuessLabel, BorderLayout.CENTER);
+        add(gamePanel, BorderLayout.NORTH);
+        
         JPanel connectionPanel=new JPanel();
         connectionPanel.setLayout(new FlowLayout());
         connectionPanel.add(new JLabel("name"));
@@ -95,22 +108,8 @@ public class ClientPanel extends Panel {
         connectionPanel.add(itemPriceTextField);
         connectionPanel.add(sellButton);
         // Add connectionPanel to ClientPanel
-        add(connectionPanel, BorderLayout.SOUTH);
+        add(connectionPanel, BorderLayout.CENTER);
         
-        
-        
-        listItemsButton.addActionListener((ActionEvent e)->{ listItems();});
-        JPanel gamePanel=new JPanel();
-        gamePanel.setLayout(new BorderLayout());
-        JPanel guessPanel=new JPanel();
-        guessPanel.setLayout(new FlowLayout());
-        guessPanel.add(new JLabel("guess"));
-        guessPanel.add(accountNameTextField);
-        guessPanel.add(registerButton);
-        guessPanel.add(listItemsButton);
-        gamePanel.add(guessPanel, BorderLayout.NORTH);
-        gamePanel.add(currentGuessLabel, BorderLayout.CENTER);
-        add(gamePanel, BorderLayout.CENTER);
         add(statusMessageLabel, BorderLayout.SOUTH);
     }
     
