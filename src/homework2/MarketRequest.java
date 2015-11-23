@@ -16,11 +16,11 @@ import java.util.List;
  */
 public interface MarketRequest extends Remote {
     
-    public String SellItem(Item item) throws RemoteException;
-    public List<Item> ListItems() throws RemoteException;
-    public String BuyItem(Item item, Owner owner) throws RemoteException;
-    public String AddWish(Item item) throws RemoteException;
-    public String Register(Owner owner) throws RemoteException;
-    public String Unregister(Owner owner) throws RemoteException;
-    public Owner GetUser(String name) throws RemoteException;
+    public Message SellItem(Item item) throws RemoteException;
+    public Message ListItems() throws RemoteException;
+    public Message BuyItem(long itemId, Owner owner) throws RemoteException;
+    public Message AddWish(Item item) throws RemoteException;
+    public Message Register(Owner owner) throws RemoteException;
+    public Message Unregister(Owner owner) throws RemoteException;
+    public Message GetUser(String name) throws RemoteException;
 }

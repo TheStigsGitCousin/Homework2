@@ -7,6 +7,7 @@ package Views;
 
 import homework2.Item;
 import homework2.MarketRequest;
+import homework2.Message;
 import homework2.Owner;
 import homework2.OwnerImpl;
 import homework2.bank.Bank;
@@ -30,6 +31,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 /**
@@ -42,10 +44,11 @@ public class ClientPanel extends Panel {
     private static Bank bankobj;
     private static final String DEFAULT_BANK_NAME = "Nordea";
     private static Owner owner;
+    private static List<Item> currentlyListedItems;
     
     // Game components
     private JLabel statusMessageLabel=new JLabel("STATUS MESSAGE:");
-    private JLabel itemsLabel=new JLabel("Items");
+    private JLabel itemsLabel=new JLabel("Items", SwingConstants.CENTER);
     private JTextField accountNameTextField=new JTextField(10);
     private JButton registerButton=new JButton("Register/Log in");
     private JButton listItemsButton=new JButton("List items");
@@ -139,15 +142,19 @@ public class ClientPanel extends Panel {
     
     private void listItems(){
         try {
-            List<Item> result=market.ListItems();
-            System.out.println(result.size());
+            currentlyListedItems=(List<Item>)market.ListItems().obj;
+            System.out.println(currentlyListedItems.size());
             StringBuilder sb=new StringBuilder();
-            for(Item item:result){
+            int index=0;
+            sb.append("format: [id]. [item]<br>");
+            for(Item item:currentlyListedItems){
                 System.out.println(item.toString());
+                sb.append(index++).append(". ");
                 sb.append(item.toString());
-                sb.append("\r\n");
+                sb.append("<br>");
             }
-            itemsLabel.setText(sb.toString());
+            itemsLabel.setText("<html>"+sb.toString()+"</html>");
+            itemsLabel.getParent().revalidate();
         } catch (RemoteException ex) {
             Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -166,10 +173,18 @@ public class ClientPanel extends Panel {
                         return;
                     }
                 
+                try {
+                    account.deposit(100000);
+                } catch (RejectedException ex) {
+                    Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 owner=new OwnerImpl(accountNameTextField.getText(), account);
-                String result=market.Register(owner);
+                Message msg=market.Register(owner);
+                String result=msg.message;
                 if(result.contains("Name already exist"))
-                    statusChanged("Logged in");
+                    statusChanged("Log in successful");
+                else
+                    statusChanged("Account registered and logged in");
                 
             } catch (RemoteException ex) {
                 Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -189,7 +204,7 @@ public class ClientPanel extends Panel {
         
         Item item=new Item(itemNameTextField.getText(), price, owner);
         try {
-            String result=market.SellItem(item);
+            String result=market.SellItem(item).message;
             statusChanged(result);
         } catch (RemoteException ex) {
             Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -198,18 +213,21 @@ public class ClientPanel extends Panel {
     }
     
     private void buy(){
-        float price;
+        if(buyItemNameTextField.getText().equals(""))
+            return;
+        
+        int index;
         try{
-            price=Float.parseFloat(itemPriceTextField.getText());
+            index=Integer.parseInt(buyItemNameTextField.getText());
         }catch(NumberFormatException e){
             return;
         }
-        if(itemNameTextField.getText().equals(""))
+        
+        if(index<0 || index>=currentlyListedItems.size())
             return;
         
-        Item item=new Item(itemNameTextField.getText(), price, owner);
         try {
-            String result=market.BuyItem(item, owner);
+            String result=market.BuyItem(currentlyListedItems.get(index).getId(), owner).message;
             statusChanged(result);
         } catch (RemoteException ex) {
             Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -229,11 +247,20 @@ public class ClientPanel extends Panel {
         
         Item item=new Item(itemNameTextField.getText(), price, owner);
         try {
-            String result=market.SellItem(item);
+            String result=market.AddWish(item).message;
             statusChanged(result);
         } catch (RemoteException ex) {
             Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
             statusChanged("Remote exception");
+        }
+    }
+    
+    private void logIn(){
+        try {
+            Message msg=market.GetUser(accountNameTextField.getText());
+            owner=(Owner)msg.obj;
+        } catch (RemoteException ex) {
+            Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
