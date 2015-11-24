@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -54,8 +56,12 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
                     for(Item wishedItem:li){
                         // If a wished item has the same name and a equal or higher price than the currently uploaded item => send notification
                         // to the owner of the wish-item
-                        if(item.getName().equals(wishedItem.getName()) && item.getPrice()<=wishedItem.getPrice())
-                            wishedItem.getOwner().wishAvaible(item);
+                        if(item.getName().equals(wishedItem.getName()) && item.getPrice()<=wishedItem.getPrice()){
+                            Owner owner=registeredUsers.get(wishedItem.getOwner());
+                            if(owner!=null)
+                                owner.wishAvaible(item);
+                            
+                        }
                     }
                 }
             }
@@ -84,25 +90,28 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
             if(item!=null){
                 System.out.println("buy item. item = "+item.toString()+", buyer = "+buyer.toString());
                 
-                Account sellerAccount=item.getOwner().getBankAccount();
-                Account buyerAccount=buyer.getBankAccount();
-                boolean successful=false;
-                try {
-                    buyerAccount.withdraw(item.getPrice());
-                    successful=true;
-                } catch (RejectedException ex) {
-                    message="Could not withdraw money.";
-                    successful=false;
-                }
-                if(successful){
+                Owner owner=registeredUsers.get(item.getOwner());
+                if(owner!=null){
+                    Account sellerAccount=owner.getBankAccount();
+                    Account buyerAccount=buyer.getBankAccount();
+                    boolean successful=false;
                     try {
-                        sellerAccount.deposit(item.getPrice());
+                        buyerAccount.withdraw(item.getPrice());
+                        successful=true;
                     } catch (RejectedException ex) {
-                        message="Couldn't deposit money.";
+                        message="Could not withdraw money.";
+                        successful=false;
                     }
-                    message="Transaction successful.";
-                    uploadedItems.remove(itemId);
-                    item.getOwner().itemSold(item);
+                    if(successful){
+                        try {
+                            sellerAccount.deposit(item.getPrice());
+                        } catch (RejectedException ex) {
+                            message="Couldn't deposit money.";
+                        }
+                        message="Transaction successful.";
+                        uploadedItems.remove(itemId);
+                        owner.itemSold(item);
+                    }
                 }
             }else{
                 message="Item not found.";
@@ -117,19 +126,22 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
     public Message AddWish(Item item) throws RemoteException {
         String message="Error adding wish.";
         synchronized(registeredUsers){
-            Owner user=registeredUsers.get(item.getOwner().getName());
-            if(user!=null){
-                synchronized(wishedItems){
-                    List<Item> list=wishedItems.get(item.getName());
-                    if(list==null){
-                        list=new ArrayList<Item>();
-                        wishedItems.put(item.getName(), list);
+            Owner owner=registeredUsers.get(item.getOwner());
+            if(owner!=null){
+                Owner user=registeredUsers.get(owner.getName());
+                if(user!=null){
+                    synchronized(wishedItems){
+                        List<Item> list=wishedItems.get(item.getName());
+                        if(list==null){
+                            list=new ArrayList<Item>();
+                            wishedItems.put(item.getName(), list);
+                        }
+                        list.add(item);
+                        message="Wish added successfully";
                     }
-                    list.add(item);
-                    message="Wish added successfully";
+                }else{
+                    message="User not recognized";
                 }
-            }else{
-                message="User not recognized";
             }
         }
         Message msg=new Message();
@@ -142,11 +154,11 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
         String message="Error registering user";
         synchronized(registeredUsers){
             if(!registeredUsers.containsKey(owner.getName())){
-                registeredUsers.put(owner.getName(), owner);
                 message="Registration successful";
             }else{
-                message="Name already registered";
+                message="Log in successful";
             }
+            registeredUsers.put(owner.getName(), owner);
         }
         Message msg=new Message();
         msg.message=message;
@@ -158,6 +170,13 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
         String message="Error unregistering user";
         synchronized(registeredUsers){
             registeredUsers.remove(owner.getName());
+            List<Item> c=new ArrayList<>();
+            // Remove items the owner has uploaded
+            for(Item item:uploadedItems.values()){
+                if(item.getOwner().equals(owner.getName()))
+                    c.add(item);
+            }
+            uploadedItems.values().removeAll(c);
             message="Unregistration successful";
         }
         Message msg=new Message();
@@ -166,7 +185,7 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
     }
     
     @Override
-    public Message GetUser(String name) throws RemoteException {
+    public Message LogIn(String name) throws RemoteException {
         Message msg=new Message();
         msg.obj=registeredUsers.get(name);
         return msg;

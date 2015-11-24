@@ -5,6 +5,7 @@
 */
 package homework2;
 
+import Views.ClientPanel;
 import homework2.bank.Account;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -30,12 +31,16 @@ public class OwnerImpl extends UnicastRemoteObject implements Owner {
     
     @Override
     public void itemSold(Item item) throws RemoteException {
-        System.out.println("Your item ("+item.toString()+") has been sold!");
+        String s="Your item ("+item.toString()+") has been sold!";
+        System.out.println(s);
+        ClientPanel.clientPanel.statusChanged(s);
     }
     
     @Override
     public void wishAvaible(Item item) throws RemoteException {
-        System.out.println("Your wish-item ("+item.toString()+") is now avaible!");
+        String s="Your wish-item ("+item.toString()+") is now avaible!";
+        System.out.println(s);
+        ClientPanel.clientPanel.statusChanged(s);
     }
     
     @Override

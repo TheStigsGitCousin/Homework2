@@ -18,9 +18,9 @@ public class Item implements Serializable {
     private String name;
     private float price;
     private long id;
-    private Owner owner;
+    private String owner;
     
-    public Item(String name, float price, Owner owner){
+    public Item(String name, float price, String owner){
         this.name=name;
         this.price=price;
         this.owner=owner;
@@ -49,21 +49,17 @@ public class Item implements Serializable {
         return id;
     }
     
-    public void setOwner(Owner owner){
+    public void setOwner(String owner){
         this.owner=owner;
     }
     
-    public Owner getOwner(){
+    public String getOwner(){
         return owner;
     }
     
     @Override
     public String toString(){
-        try {
-            return name+", "+Long.toString(id)+", "+Double.toString(price)+", "+owner.getName();
-        } catch (RemoteException ex) {
-            Logger.getLogger(Item.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return name+", "+Double.toString(price)+", UNKNOWN";
+        return name+", "+Double.toString(price)+", "+owner;
+//        return name+", "+Double.toString(price)+", UNKNOWN";
     }
 }
