@@ -73,6 +73,7 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
     
     @Override
     public Message ListItems() throws RemoteException {
+        System.out.println("list items.");
         synchronized(uploadedItems){
             System.out.println("Upload items length = "+uploadedItems.size());
             Message msg=new Message();
@@ -87,6 +88,7 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
         String message="Unspecified error occured when buying item. No item bought.";
         synchronized(uploadedItems){
             Item item=uploadedItems.get(itemId);
+            System.out.println("buy item. "+item.toString());
             if(item!=null){
                 System.out.println("buy item. item = "+item.toString()+", buyer = "+buyer.toString());
                 
@@ -124,6 +126,7 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
     
     @Override
     public Message AddWish(Item item) throws RemoteException {
+        System.out.println("add item. "+item.toString());
         String message="Error adding wish.";
         synchronized(registeredUsers){
             Owner owner=registeredUsers.get(item.getOwner());
@@ -151,6 +154,7 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
     
     @Override
     public Message Register(Owner owner) throws RemoteException {
+        System.out.println("register. "+owner.getName());
         String message="Error registering user";
         synchronized(registeredUsers){
             if(!registeredUsers.containsKey(owner.getName())){
@@ -167,6 +171,7 @@ public class MarketRequestImpl extends UnicastRemoteObject implements MarketRequ
     
     @Override
     public Message Unregister(Owner owner) throws RemoteException {
+        System.out.println("unregister. "+owner.getName());
         String message="Error unregistering user";
         synchronized(registeredUsers){
             registeredUsers.remove(owner.getName());

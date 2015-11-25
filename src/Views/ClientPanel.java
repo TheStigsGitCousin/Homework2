@@ -310,10 +310,11 @@ public class ClientPanel extends Panel {
                 try {
                     try {
                         bankobj.newAccount(accountNameTextField.getText());
+                        statusChanged("New bank account successfully created");
                     } catch (RejectedException ex) {
                         Logger.getLogger(ClientPanel.class.getName()).log(Level.SEVERE, null, ex);
+                        statusChanged("Bank account already exist");
                     }
-                    statusChanged("New bank account successfully created");
                     buyButton.setEnabled(false);
                     sellButton.setEnabled(false);
                     wishButton.setEnabled(false);
