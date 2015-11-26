@@ -57,3 +57,7 @@ public class MarketClient {
             new MarketClient(args[0]);
     }
 }
+
+//http://stackoverflow.com/questions/774828/rmi-how-does-passing-a-remote-object-through-a-remote-method-work
+//https://docs.oracle.com/javase/8/docs/platform/rmi/spec/rmi-objmodel7.html
+//http://stackoverflow.com/questions/8330295/difference-between-java-rmi-naming-and-java-rmi-registry-locateregistry
